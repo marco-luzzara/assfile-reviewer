@@ -5,11 +5,12 @@ import argparse
 import os
 
 dialogueRegex = re.compile(r'^(Dialogue:(?:[^,]*?,){9})(.*?)$')
-capitalPunctuationRegex = re.compile(r'([?!.]\s*)(\w)')
+capitalPunctuationRegex = re.compile(r'([?!.-]\s*)(\w)')
 AssFormattingRegex = re.compile(r'\{.*?\}')
+capitalizeNameRegex = re.compile(r'\w+', re.IGNORECASE)
 
 class LineReviewer:
-    def __init__(self, initialLine: str, maxLineLength: int):
+    def __init__(self, initialLine: str, maxLineLength: int, namesToCapitalize: list(str)):
         self._line = initialLine
         self._maxLen = maxLineLength
         self._line = self._line.replace('\\N', '')
@@ -22,6 +23,8 @@ class LineReviewer:
             self._formattingMatches.append([startPos, formattingMatchStr])
             self._line = self._line.replace(formattingMatchStr, '', 1)
             formattingMatch = AssFormattingRegex.search(self._line, startPos)
+
+        self._namesToCapitalize = namesToCapitalize
 
     def capitalizeLine(self) -> LineReviewer:
         if len(self._line) > 0:
@@ -69,6 +72,10 @@ class LineReviewer:
         self._line = '\\N'.join(lineChunks)
         return self
 
+    def capitalizeNames(self) -> LineReviewer:
+        self._line = capitalizeNameRegex.sub(lambda match: match.group(0).capitalize() if match.group(0).lower() in self._namesToCapitalize else match.group(0), self._line)
+        return self
+
     def getReviewedLine(self) -> str:
         lastIndex = 0
         newLineIndex = self._line.find('\\N', lastIndex)
@@ -90,9 +97,9 @@ class LineReviewer:
         return self._line
 
 
-def reviewLine(line: str, maxLineLength: int) -> str:
-    reviewer = LineReviewer(line, maxLineLength)
-    reviewer.capitalizeLine().upperCaseForCapitalPunctuation().splitLineWhenGreaterThanMaxLen()
+def reviewLine(line: str, maxLineLength: int, namesToCapitalize: list(str)) -> str:
+    reviewer = LineReviewer(line, maxLineLength, namesToCapitalize)
+    reviewer.capitalizeLine().capitalizeNames().upperCaseForCapitalPunctuation().splitLineWhenGreaterThanMaxLen()
 
     return reviewer.getReviewedLine()
 
@@ -113,12 +120,28 @@ def init_argparse() -> argparse.ArgumentParser:
             splitted lines' lengths are as similar as possible."""
     )
     parser.add_argument(
+        "--capitalizeNamesFilePath", 
+        action="store",
+        default=None,
+        type=str,
+        help="""The file path where a list of words is stored, separated by newlines. The
+        occurences of these words inside the dialogues are capitalized."""
+    )
+    parser.add_argument(
         'assPath',
         action="store",
         type=str,
         help="""The path of the .ass file to review.""")
 
     return parser
+
+
+def getListOfNamesToCapitalize(fileName: str) -> list(str):
+    if fileName is None:
+        return []
+
+    with open(fileName, 'r') as f:
+        return [line.strip() for line in f]
 
 
 if __name__ == "__main__":
@@ -128,9 +151,11 @@ if __name__ == "__main__":
     filePath = args.assPath
     fileName = os.path.splitext(os.path.basename(filePath))[0]
     maxLineLength = args.maxLineLen
+    namesToCapitalizeFilePath = args.capitalizeNamesFilePath
+    namesToCapitalizeList = getListOfNamesToCapitalize(namesToCapitalizeFilePath)
 
     with open(filePath, 'r', encoding='utf8') as fIn, open(f'{fileName}_reviewed.ass', 'w', encoding='utf8') as fOut:
         for line in fIn:
-            reviewedText = dialogueRegex.sub(lambda match: match.group(1) + reviewLine(match.group(2), maxLineLength), line)
+            reviewedText = dialogueRegex.sub(lambda match: match.group(1) + reviewLine(match.group(2), maxLineLength, namesToCapitalizeList), line)
 
             fOut.write(f'{reviewedText}')
