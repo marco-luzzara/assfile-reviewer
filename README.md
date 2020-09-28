@@ -15,4 +15,8 @@ As for now, fixed mistakes are letter that should be capitalized after fullstops
   the algorithm split optimally the entire text so that words are not truncated and 
   splitted lines' lengths are as similar as possible. Default value is 0, which means "do not split".
  
+* `--capitalizeNamesFilePath`
+  The file path where a list of words is stored, separated by newlines. The
+  occurences of these words inside the dialogues are capitalized.
+ 
 
