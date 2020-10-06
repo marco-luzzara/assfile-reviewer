@@ -22,4 +22,8 @@ For more info on arguments: `py translate.py --help`
 
 
  
+* `--capitalizeNamesFilePath`
+  The file path where a list of words is stored, separated by newlines. The
+  occurences of these words inside the dialogues are capitalized.
+ 
 
