@@ -1,3 +1,4 @@
 .vscode/
 *.ass
 *.txt
+*.pyc
