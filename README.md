@@ -19,11 +19,3 @@ Translates from english to italian a .ass file using IBM Watson API, the file ge
 `py translate.py yourfilename.ass --apiKey='secretapykey' --serviceUrl='secretServiceUrl'`
 
 For more info on arguments: `py translate.py --help`
-
-
- 
-* `--capitalizeNamesFilePath`
-  The file path where a list of words is stored, separated by newlines. The
-  occurences of these words inside the dialogues are capitalized.
- 
-
