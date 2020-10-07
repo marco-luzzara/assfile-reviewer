@@ -6,6 +6,7 @@ class LineReviewer:
     def __init__(self, initialLine: str, maxLineLength: int, namesToCapitalize: list(str)):
         self._maxLen = maxLineLength
         self._line = initialLine.replace('\\N', '')
+        self._capitalizeLineRegex = re.compile(r'(^\s*)([a-z])')
         self._capitalPunctuationRegex = re.compile(r'([?!.-]\s*)(\w)')
         self._AssFormattingRegex = re.compile(r'\{.*?\}')
         self._capitalizeNameRegex = re.compile(r'\w+', re.IGNORECASE)
@@ -22,8 +23,7 @@ class LineReviewer:
         self._namesToCapitalize = namesToCapitalize
 
     def capitalizeLine(self) -> LineReviewer:
-        if len(self._line) > 0:
-            self._line = self._line[0].upper() + self._line[1:]
+        self._line = self._capitalizeLineRegex.sub(lambda match: match.group(1) + match.group(2).upper(), self._line)
         return self
 
     def upperCaseForCapitalPunctuation(self) -> LineReviewer:
