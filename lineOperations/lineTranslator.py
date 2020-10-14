@@ -1,4 +1,6 @@
 from __future__ import annotations
+import re
+
 from ibm_watson import LanguageTranslatorV3
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
@@ -10,7 +12,11 @@ class LineTranslator:
             authenticator=self._authenticator
         )
         self._language_translator.set_service_url(serviceUrl)
+        self._AssFormattingRegex = re.compile(r'\{.*?\}')
 
     def getTranslatedLine(self, line: str) -> str:
         translation = self._language_translator.translate(text=line, source='en', target='it').get_result()
-        return translation['translations'][0]['translation']
+        rawTranslatedLine = translation['translations'][0]['translation']
+        translatedLine = self._AssFormattingRegex.sub(lambda match: match.group(0).replace(' ', ''), rawTranslatedLine)
+
+        return translatedLine
