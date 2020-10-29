@@ -5,7 +5,7 @@ import math
 class LineReviewer:
     def __init__(self, initialLine: str, maxLineLength: int, namesToCapitalize: list(str)):
         self._maxLen = maxLineLength
-        self._line = initialLine.replace('\\N', '')
+        self._line = initialLine
         self._capitalizeLineRegex = re.compile(r'(^\s*)([a-z])')
         self._capitalPunctuationRegex = re.compile(r'([?!.-]\s*)(\w)')
         self._AssFormattingRegex = re.compile(r'\{.*?\}')
