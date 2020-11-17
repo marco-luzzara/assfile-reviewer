@@ -3,7 +3,7 @@ import re
 import math
 
 class LineReviewer:
-    def __init__(self, initialLine: str, maxLineLength: int, namesToCapitalize: list(str)):
+    def __init__(self, initialLine: str, maxLineLength: int, namesToCapitalize: set[str]):
         self._maxLen = maxLineLength
         self._line = initialLine
         self._capitalizeLineRegex = re.compile(r'(^\s*)([A-zÀ-ú])')

@@ -1,8 +1,7 @@
 from __future__ import annotations
 import argparse
-import os
-from lineOperations.lineExtractor import LineExtractor
-from lineOperations.lineTranslator import LineTranslator
+
+from operations.translator import Translator
 
 if __name__ == "__main__":
     def init_argparse() -> argparse.ArgumentParser:
@@ -33,17 +32,10 @@ if __name__ == "__main__":
 
     parser = init_argparse()
     args = parser.parse_args()
+
     filePath = args.assPath
-    fileName = os.path.splitext(os.path.basename(filePath))[0]
     apiKey = args.apiKey
     serviceUrl = args.serviceUrl
 
-    translator = LineTranslator(apiKey, serviceUrl)
-    def translateLine(line: str) -> str:
-        return translator.getTranslatedLine(line)
-
-    with open(filePath, 'r', encoding='utf8') as fIn, open(f'{fileName}_translated.ass', 'w', encoding='utf8') as fOut:
-        for line in fIn:
-            extractor = LineExtractor(line, translateLine)
-
-            fOut.write(f'{extractor.getTransformedLine()}')
+    translator = Translator(filePath, apiKey, serviceUrl)
+    translator.translate()
