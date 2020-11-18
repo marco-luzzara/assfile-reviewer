@@ -7,7 +7,7 @@ import os
 
 from operations.reviewer import Reviewer
 
-WINDOW_HEIGHT = 300
+WINDOW_HEIGHT = 320
 WINDOW_WIDTH = 500
 
 class ReviewerWindow(tk.Frame):
@@ -34,13 +34,9 @@ class ReviewerWindow(tk.Frame):
         self.maxLineLengthLabel.grid(row=0, column=0, pady=10, padx=10, sticky=tk.E)
 
         # maxLineLength entry
-        self._maxLineLength = configParser.get('root', 'defaultMaxLineLength')
-        if self._validateMaxLineLength(self._maxLineLength) is False:
-            mb.showerror(title='Bad Configuration', message='defaultMaxLineLength configuration property is not a positive (> 1) integer.')
-            exit()
-        validateMaxLineLengthCommand = self.register(self._validateMaxLineLength)
-        self.maxLineLengthEntry = tk.Entry(self, validate='key', validatecommand=(validateMaxLineLengthCommand, '%S'))
-        self.maxLineLengthEntry.insert(0, self._maxLineLength)
+        defaultMaxLineLength = configParser.get('root', 'defaultMaxLineLength')
+        self.maxLineLengthEntry = tk.Entry(self)
+        self.maxLineLengthEntry.insert(0, defaultMaxLineLength)
         self.maxLineLengthEntry.grid(row=0, column=1, pady=10, padx=10, sticky=tk.W)
 
         ttk.Separator(self, orient='horizontal').grid(row=1, columnspan=2, sticky=tk.EW)
@@ -101,15 +97,15 @@ class ReviewerWindow(tk.Frame):
 
 
     def _clickReviewButton(self):
+        if self._retrieveMaxLineLength(self.maxLineLengthEntry.get()) is False:
+            mb.showerror(title="Invalid maximum line length", message="Maximum line length must be a positive integer greater than 1.")
+            return
+
         if self._filePath == None:
             mb.showerror(title="No filepath selected", message="Please load the .ass file")
             return
 
-        if self._namesToCapitalizeFilePath == None:
-            mb.showerror(title="No filepath selected", message="Please load the file containing the names to be capitalized.")
-            return
-
-        reviewConfirmed = mb.askokcancel(title="Ready to review", message="Click ok to start the review process, then wait! An another message box will notify you at the end.")
+        reviewConfirmed = mb.askokcancel(title="Ready to review", message="Click ok to start the review process, then wait! Another message box will notify you at the end.")
         if reviewConfirmed is False:
             return
         self._reviewer = Reviewer(self._filePath, self._maxLineLength, self._namesToCapitalizeFilePath)
@@ -117,14 +113,11 @@ class ReviewerWindow(tk.Frame):
         mb.showinfo(title="Review done!", message='Review successful. You should see a new .ass file with the suffix "_reviewed"')
     
 
-    def _validateMaxLineLength(self, mll: str) -> bool:
+    def _retrieveMaxLineLength(self, mll: str) -> bool:
         try:
             val = int(mll)
-            if val > 1:
-                self._maxLineLength = val
-                return True
-            else:
-                return False
+            self._maxLineLength = val
+            return val > 1
         except ValueError:
             return False
 
