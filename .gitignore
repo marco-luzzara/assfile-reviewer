@@ -3,3 +3,5 @@
 *.txt
 *.pyc
 *.ini
+install/*
+!install/install.ps1
